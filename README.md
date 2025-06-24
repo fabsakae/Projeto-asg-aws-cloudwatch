@@ -92,7 +92,9 @@ chmod +x /var/www/html/teste
 httpd -k start
 ```
 
-![Hello World no Navegador](images/pagina-web-hello.jpeg)
+![hello-world](https://github.com/user-attachments/assets/b36cd3fa-43b6-436e-8d39-f549326bcd1a)
+
+
 
 ### 4. Classic Load Balancer (CLB)
 
