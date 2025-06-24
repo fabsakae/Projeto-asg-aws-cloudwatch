@@ -36,7 +36,8 @@ Criação de uma VPC (Virtual Private Cloud) e algumas sub-redes públicas, elim
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
 
-![pagina-web-hello](https://github.com/user-attachments/assets/40425aff-1910-423d-b95b-0d56090864cd)
+![hello-world](https://github.com/user-attachments/assets/b36cd3fa-43b6-436e-8d39-f549326bcd1a)
+
 
 
 ### 2. Classic Load Balancer (CLB)
