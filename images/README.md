@@ -22,20 +22,20 @@ A arquitetura implementada consiste nos seguintes serviços AWS:
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
 
-![Hello World no Navegador](images/image_pagina-web-hello.jpg)
+![Hello World no Navegador](images/image_pagina-web-hello.jpeg)
 
 ### 2. Classic Load Balancer (CLB)
 
 Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group.
 
-![Configuração do CLB](images/image_lb-detalhes.jpg)
-![Atividades do CLB](images/image_lb-healthy.jpg)
+![Configuração do CLB](images/image_lb-detalhes.jpeg)
+![Atividades do CLB](images/image_lb-healthy.jpeg)
 ### 3. Auto Scaling Group (ASG)
 
 O ASG (`meu-asg-teste-clb`) foi configurado para gerenciar as instâncias EC2. Ele utiliza um Modelo de Lançamento para definir as características das instâncias (AMI) e está associado a múltiplas zonas de disponibilidade para alta resiliência.
-![Detalhes ASG](images/image_asg-detalhes.jpg)
-![Politicas do ASG](images/image_asg-politicas.jpg)
-![Atividades do ASG](images/image_asg-atividades.jpg)
+![Detalhes ASG](images/image_asg-detalhes.jpeg)
+![Politicas do ASG](images/image_asg-politicas.jpeg)
+![Atividades do ASG](images/image_asg-atividades.jpeg)
 
 ### 4. Alarmes do CloudWatch
 
@@ -45,17 +45,17 @@ Dois alarmes principais foram configurados no CloudWatch para monitorar a métri
     * **Condição:** `RequestCount < 5` (para 1 ponto de dados em 1 minuto)
     * **Métrica:** `AWS/ELB RequestCount`, Estatística `Average` (Média).
 
-    ![Alarme de Diminuir em Alarme](images/image_alarme-diminuir-detalhes.jpg)
+    ![Alarme de Diminuir em Alarme](images/image_alarme-diminuir-detalhes.jpeg)
     
-    ![Email de Diminuir em Alarme](images/image_diminuir-email.jpg)
+    ![Email de Diminuir em Alarme](images/image_diminuir-email.jpeg)
 
 * **`alarme-aumentar-requestcount-clb` (Scale Out):** Dispara quando o número total de requisições excede um limiar.
     * **Condição:** `RequestCount > 100` (para 1 ponto de dados em 1 minuto)
     * **Métrica:** `AWS/ELB RequestCount`, Estatística `Sum` (Soma). (Importante: a estatística foi ajustada de Média para Soma para capturar o volume total de tráfego do LB).
 
-    ![Alarme de Aumentar em Alarme](images/image_alarme-aumentar-detalhes.jpg)
+    ![Alarme de Aumentar em Alarme](images/image_alarme-aumentar-detalhes.jpeg)
     
-    ![Email de Aumentar em Alarme](images/image_aumentar-email.jpg)
+    ![Email de Aumentar em Alarme](images/image_aumentar-email.jpeg)
     
         
 
@@ -65,11 +65,11 @@ Duas políticas de escalabilidade foram associadas ao ASG:
 
 * **`diminuir-instancias-requestcount`:** Vinculada ao `alarme-diminuir-requestcount-clb`. Quando acionada, remove 1 unidade de capacidade.
 
-    ![Política de Diminuir Instâncias](images/image_asg-politicas.jpg)
+    ![Política de Diminuir Instâncias](images/image_asg-politicas.jpeg)
 
 * **`aumentar-instancias-requestcount`:** Vinculada ao `alarme-aumentar-requestcount-clb`. Quando acionada, adiciona 1 unidade de capacidade.
 
-    ![Configuração da Política de Escalabilidade Simples](images/image_asg-politicas.jpg)
+    ![Configuração da Política de Escalabilidade Simples](images/image_asg-politicas.jpeg)
 
 ## Teste e Validação
 
@@ -79,23 +79,23 @@ Para validar o funcionamento do Auto Scaling, foram realizados testes de carga u
 
 Quando o tráfego foi baixo ou inexistente, o alarme `alarme-diminuir-requestcount-clb` entrou no estado `ALARM`, indicando que a capacidade poderia ser reduzida.
 
-![Estado dos Alarmes (Diminuir em Alarme)](images/image_alarmes-iniciados.jpg)
+![Estado dos Alarmes (Diminuir em Alarme)](images/image_alarmes-iniciados.jpeg)
 
 ### Teste de Aumento de Capacidade (Scale Out)
 
 Para simular o aumento de tráfego, o comando `hey` foi utilizado para gerar um volume significativo de requisições por um período sustentado (por exemplo, `hey -z 3m -c 50 http://seu-dns-do-clb.amazonaws.com/`).
-![Histórico de Atividades do (Teste de Carga)](images/image_teste.hey.jpg)
+![Histórico de Atividades do (Teste de Carga)](images/image_teste.hey.jpeg)
 
 O alarme `alarme-aumentar-requestcount-clb` entrou no estado `ALARM` (conforme visto nos detalhes da métrica e no estado do alarme durante o teste).
 
 O histórico de atividades do Auto Scaling Group confirmou que uma nova instância foi lançada em resposta ao alarme de aumento de requisições:
 
-![Histórico de Atividades do ASG (Lançamento de Instância)](images/image_asg-atividade-ec2.jpg)
+![Histórico de Atividades do ASG (Lançamento de Instância)](images/image_asg-atividade-ec2.jpeg)
 *Observar a linha "Launching a new EC2 instance ... in response to EC2 alarm ... changing the desired capacity from 1 to 2".*
 
 A verificação no painel de instâncias EC2 confirmou a presença de duas instâncias em execução após o disparo do alarme de aumento:
 
-![Painel de Instâncias EC2 (Duas Instâncias)](images/image_escalabilidade-instancia.jpg)
+![Painel de Instâncias EC2 (Duas Instâncias)](images/image_escalabilidade-instancia.jpeg)
 *Presença da instância original (`i-0d98ac084a80100ca`) e da nova instância (`i-0360c353c42b45db2`).*
 
 ## Conclusão
