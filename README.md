@@ -1,5 +1,24 @@
 # Projeto-asg-aws-cloudwatch
 Repositório do projeto de Auto Scaling, CLB e  Endpoint de Teste.
+
+O projeto se consiste nos seguintes tópicos:
+
+* [Visão-Geral-do-Projeto](#visão-geral-do-projeto)
+* [Componentes-da-Arquitetura](#componentes-da-arquitetura)
+* [Configuração-e-Implementação](#configuração-e-implementação)
+    * [0. Criação de Chave de Par (Key Pair) para SSH](#0-criação-de-chave-de-par-key-pair-para-ssh)
+    * [1. Criação da VPC e Subredes](#1-criação-da-vpc-e-subredes)
+    * [2. Security Groups](#2-security-groups)
+    * [3. Aplicação Web Simples (Hello World)](#3-aplicação-web-simples-hello-world)
+    * [4. Classic Load Balancer (CLB)](#4-classic-load-balancer-clb)
+    * [5. Auto Scaling Group (ASG)](#5-auto-scaling-group-asg)
+    * [6. Alarmes do CloudWatch](#6-alarmes-do-cloudwatch)
+    * [7. Políticas de Escala Dinâmica](#7-políticas-de-escala-dinâmica)
+* [Teste-e-Validação](#teste-e-validação)
+    * [Teste de Diminuição de Capacidade (Scale In)](#teste-de-diminuição-de-capacidade-scale-in)
+    * [Teste de Aumento de Capacidade (Scale Out)](#teste-de-aumento-de-capacidade-scale-out)
+* [Conclusão](#conclusão)
+
 # Projeto de Auto Scaling na AWS com Classic Load Balancer (CLB)
 
 ## Visão Geral do Projeto
@@ -10,48 +29,65 @@ Este projeto demonstra a implementação de um sistema de Auto Scaling na Amazon
 
 A arquitetura implementada consiste nos seguintes serviços AWS:
 
-1.  **Amazon EC2:** Máquinas virtuais que hospedam a aplicação web ("hello world").
-2.  **Classic Load Balancer (CLB):** Distribui o tráfego de entrada para as instâncias EC2 saudáveis.
-3.  **Auto Scaling Group (ASG):** Gerencia a coleção de instâncias EC2, garantindo que o número desejado de instâncias esteja sempre em execução.
-4.  **Amazon CloudWatch:** Monitora métricas de performance (como RequestCount do CLB) e dispara alarmes.
-5.  **Políticas de Escala Dinâmica (Dynamic Scaling Policies):** Definem as ações do ASG em resposta aos alarmes do CloudWatch.
+1. **Virtual Private Cloud:** Rede virtual que comunica os recursos da AWS e da rede externa.
+2. **Security Groups:** Regras de firewall que controlam o tráfego de entrada e saída das instâncias EC2.
+3.  **Amazon EC2:** Máquinas virtuais que hospedam a aplicação web ("hello world").
+4.  **Classic Load Balancer (CLB):** Distribui o tráfego de entrada para as instâncias EC2 saudáveis.
+5.  **Auto Scaling Group (ASG):** Gerencia a coleção de instâncias EC2, garantindo que o número desejado de instâncias esteja sempre em execução.
+6.  **Amazon CloudWatch:** Monitora métricas de performance (como RequestCount do CLB) e dispara alarmes.
+7.  **Políticas de Escala Dinâmica (Dynamic Scaling Policies):** Definem as ações do ASG em resposta aos alarmes do CloudWatch.
 
 ## Configuração e Implementação
-
+Para acessar o projeto pode ser utilizado uma chave de par (key pair) para SSH. Como este item não é necessario, pois podemos usar a conexão via EC2 Instance Connect neste caso, chamaremos este item como o de numero 0.Para criar a chave de par siga os seguintes passos:
 ### 0. Criação de Chave de Par (Key Pair) para SSH
 
-Para se conectar às suas instâncias EC2 via SSH
+Acesse o menu de EC2 e navegue na aba lateral esquerda até a opção Rede e segurança > pares de chaves. Clique em criar par de chaves. Escreva o nome do par de chaves, selecione o formato de chave como `pem` e clique em criar. O arquivo será baixado automaticamente para o seu computador. Guarde-o em um local seguro, pois ele será necessário para acessar as instâncias EC2 via SSH. Após isto, use o comando no powershell no arquivo baixado para conectar na instância EC2:
+```powershell
+icacls.exe "C:\caminho\nome-da-chave.pem" /reset
+ icacls.exe "C:\caminho\nome-da-chave.pem" /inheritance:r
+```
+```powershell
+ssh -i "nome-da-chave.pem" ec2-user@ip-da-instancia
+``` 
 
 ![key-pair](images/key-pair.jpeg)
 
-### 0.1 Criação da VPC e Subredes
+### 1. Criação da VPC e Subredes
 
-Criação de uma VPC (Virtual Private Cloud) e algumas sub-redes públicas, eliminando a necessidade de NAT Gateway.
+Criação de uma VPC (Virtual Private Cloud) e algumas sub-redes públicas, eliminando a necessidade de NAT Gateway. Para criar a VPC, pesquise pela mesma, clique para acessar seu menu e clique em "criar VPC". Clique em VPC e mais, escreva o nome da VPC, slecione 2 sub-redes públicas e nenhuma rede privada. Clique em criar VPC.
 
 ![vpc-detalhes](https://github.com/user-attachments/assets/7bca8846-9a64-46a6-8f34-d3c2468d3ecc)
 
-![vpc-mapa-recursos](images/vpc-mapa-recursos.jpeg)
+O mapa de recursos resultante toma forma de:
 
-### 1. Aplicação Web Simples (Hello World)
+![vpc-mapa-recursos](images/vpc-mapa-recursos.jpeg)
+### 2. Security Groups
+Para este projeto, foram criados os seguintes security groups:
+* **`sg-ec2-teste-clb`:** Permite tráfego HTTP (porta 80) de do grupo de segurança do CLB e tráfego de saída para a porta 22 (SSH) para o IP do usuário. Não foi restringido nenhuma conexão de saída. Este grupo é associado às instâncias EC2.
+![grupo de seguranca ec2](images/sg-ec2-inbound.jpeg)
+* **`sg-clb-teste`:** Permite tráfego HTTP (porta 80) de qualquer origem. Não foi restringido nenhuma conexão de saída. Este grupo é associado ao Classic Load Balancer (CLB).
+![grupo de seguranca clb](images/sg-lb-inbound.jpeg)
+
+### 3. Aplicação Web Simples (Hello World)
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
 
 ![Hello World no Navegador](images/pagina-web-hello.jpeg)
 
-### 2. Classic Load Balancer (CLB)
+### 4. Classic Load Balancer (CLB)
 
 Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group.
 
 ![Configuração do CLB](images/lb-detalhes.jpeg)
 ![Atividades do CLB](images/lb-healthy.jpeg)
-### 3. Auto Scaling Group (ASG)
+### 5. Auto Scaling Group (ASG)
 
 O ASG (`meu-asg-teste-clb`) foi configurado para gerenciar as instâncias EC2. Ele utiliza um Modelo de Lançamento para definir as características das instâncias (AMI) e está associado a múltiplas zonas de disponibilidade para alta resiliência.
 ![Detalhes ASG](images/asg-detalhes.jpeg)
 ![Politicas do ASG](images/asg-politicas.jpeg)
 ![Atividades do ASG](images/asg-atividades.jpeg)
 
-### 4. Alarmes do CloudWatch
+### 6. Alarmes do CloudWatch
 
 Dois alarmes principais foram configurados no CloudWatch para monitorar a métrica `RequestCount` do CLB:
 
@@ -73,7 +109,7 @@ Dois alarmes principais foram configurados no CloudWatch para monitorar a métri
     
         
 
-### 5. Políticas de Escala Dinâmica
+### 7. Políticas de Escala Dinâmica
 
 Duas políticas de escalabilidade foram associadas ao ASG:
 
