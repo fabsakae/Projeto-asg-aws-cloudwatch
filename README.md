@@ -18,6 +18,20 @@ A arquitetura implementada consiste nos seguintes serviços AWS:
 
 ## Configuração e Implementação
 
+### 0. Criação de Chave de Par (Key Pair) para SSH
+
+Para se conectar às suas instâncias EC2 via SSH
+
+![key-pair](images/key-pair.jpeg)
+
+### 0.1 Criação da VPC e Subredes
+
+Criação de uma VPC (Virtual Private Cloud) e algumas sub-redes públicas, eliminando a necessidade de NAT Gateway.
+
+![vpc-detalhes](https://github.com/user-attachments/assets/7bca8846-9a64-46a6-8f34-d3c2468d3ecc)
+
+![vpc-mapa-recursos](images/vpc-mapa-recursos.jpeg)
+
 ### 1. Aplicação Web Simples (Hello World)
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
