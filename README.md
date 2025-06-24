@@ -22,7 +22,7 @@ A arquitetura implementada consiste nos seguintes serviços AWS:
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
 
-![Hello World no Navegador](images/image_pagina-web-hello.png)
+![Hello World no Navegador](images/image_pagina-web-hello.jpeg)
 
 ### 2. Classic Load Balancer (CLB)
 
