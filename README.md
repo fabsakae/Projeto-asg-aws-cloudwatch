@@ -109,13 +109,13 @@ systemctl enable httpd
 
 ### 4. Classic Load Balancer (CLB)
 
-Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group. Para este projeto, foi solicitado que houvesse no mínimo uma instancia ativa e no máximo três, gerenciadas pelas [políticas](#7-políticas-de-escala-dinâmica) de escala da ASG que serão apresentadas no futuro.
+Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group. 
 
 ![Configuração do CLB](images/lb-detalhes.jpeg)
 ![Atividades do CLB](images/lb-healthy.jpeg)
 ### 5. Auto Scaling Group (ASG)
 
-O ASG (`meu-asg-teste-clb`) foi configurado para gerenciar as instâncias EC2. Ele utiliza um Modelo de Lançamento para definir as características das instâncias (AMI) e está associado a múltiplas zonas de disponibilidade para alta resiliência.
+O ASG (`meu-asg-teste-clb`) foi configurado para gerenciar as instâncias EC2. Ele utiliza um Modelo de Lançamento para definir as características das instâncias (AMI) e está associado a múltiplas zonas de disponibilidade para alta resiliência.Para este projeto, foi solicitado que houvesse no mínimo uma instancia ativa e no máximo três, gerenciadas pelas [políticas](#7-políticas-de-escala-dinâmica) de escala da ASG que serão apresentadas no futuro.
 ![Detalhes ASG](images/asg-detalhes.jpeg)
 ![Politicas do ASG](images/asg-politicas.jpeg)
 ![Atividades do ASG](images/asg-atividades.jpeg)
