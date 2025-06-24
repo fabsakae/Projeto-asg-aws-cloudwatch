@@ -71,6 +71,26 @@ Para este projeto, foram criados os seguintes security groups:
 ### 3. Aplicação Web Simples (Hello World)
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
+Para criar a instância EC2, pesquise por instâncias EC2, clique em "criar instância", selecione a imagem Amazon Linux 2, escolha o tipo de instância t2.micro, selecione o par de chaves criado anteriormente e associe os grupos de segurança criados. Após isto, selecione a opção configurações avançadas e adicione o seguinte [script](user_data.sh) de inicialização (user data) para instalar o servidor web e servir a página "hello world":
+
+```bash
+#!/bin/bash
+
+yum update -y
+yum install -y httpd
+echo "Hello World" > /var/www/html/index.html
+# Servidor básico com endpoint /teste
+cat <<EOL > /var/www/html/teste
+#!/bin/bash
+echo "Content-type: text/plain"
+echo ""
+echo "Requisição recebida em $(hostname)"
+sleep 5 # simula carga
+EOL
+
+chmod +x /var/www/html/teste
+httpd -k start
+```
 
 ![Hello World no Navegador](images/pagina-web-hello.jpeg)
 
