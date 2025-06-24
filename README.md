@@ -84,7 +84,7 @@ Quando o tráfego foi baixo ou inexistente, o alarme `alarme-diminuir-requestcou
 ### Teste de Aumento de Capacidade (Scale Out)
 
 Para simular o aumento de tráfego, o comando `hey` foi utilizado para gerar um volume significativo de requisições por um período sustentado (por exemplo, `hey -z 3m -c 50 http://seu-dns-do-clb.amazonaws.com/`).
-![Histórico de Atividades do (Teste de Carga)](images/teste.hey.jpeg)
+![Histórico de Atividades do (Teste de Carga)](images/teste-hey.jpeg)
 
 O alarme `alarme-aumentar-requestcount-clb` entrou no estado `ALARM` (conforme visto nos detalhes da métrica e no estado do alarme durante o teste).
 
