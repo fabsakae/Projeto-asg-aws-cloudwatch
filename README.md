@@ -89,7 +89,18 @@ sleep 5 # simula carga
 EOL
 
 chmod +x /var/www/html/teste
-httpd -k start
+systemctl start httpd
+systemctl enable httpd
+```
+
+Houve uma modificação no script dado no user_data, realizando a modificação pois ocorreu erro na inicialização do processo Apache, Para Iniciar o serviço apache httpd e o habilitar para iniciar o boot:
+
+```bash
+#httpd -k start 
+
+systemctl start httpd
+systemctl enable httpd
+
 ```
 
 ![hello-world](https://github.com/user-attachments/assets/b36cd3fa-43b6-436e-8d39-f549326bcd1a)

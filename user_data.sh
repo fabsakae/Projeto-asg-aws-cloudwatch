@@ -13,4 +13,5 @@ sleep 5 # simula carga
 EOL
 
 chmod +x /var/www/html/teste
-httpd -k start
+systemctl start httpd
+systemctl enable httpd
