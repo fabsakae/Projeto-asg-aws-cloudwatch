@@ -109,7 +109,7 @@ systemctl enable httpd
 
 ### 4. Classic Load Balancer (CLB)
 
-Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group.
+Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group. Para este projeto, foi solicitado que houvesse no mínimo uma instancia ativa e no máximo três, gerenciadas pelas [políticas](#7-políticas-de-escala-dinâmica) de escala da ASG que serão apresentadas no futuro.
 
 ![Configuração do CLB](images/lb-detalhes.jpeg)
 ![Atividades do CLB](images/lb-healthy.jpeg)
