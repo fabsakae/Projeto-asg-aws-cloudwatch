@@ -6,14 +6,14 @@ O projeto se consiste nos seguintes tópicos:
 * [Visão-Geral-do-Projeto](#visão-geral-do-projeto)
 * [Componentes-da-Arquitetura](#componentes-da-arquitetura)
 * [Configuração-e-Implementação](#configuração-e-implementação)
-    * [0. Criação de Chave de Par (Key Pair) para SSH](#0-criação-de-chave-de-par-key-pair-para-ssh)
-    * [1. Criação da VPC e Subredes](#1-criação-da-vpc-e-subredes)
-    * [2. Security Groups](#2-security-groups)
-    * [3. Aplicação Web Simples (Hello World)](#3-aplicação-web-simples-hello-world)
-    * [4. Classic Load Balancer (CLB)](#4-classic-load-balancer-clb)
-    * [5. Auto Scaling Group (ASG)](#5-auto-scaling-group-asg)
-    * [6. Alarmes do CloudWatch](#6-alarmes-do-cloudwatch)
-    * [7. Políticas de Escala Dinâmica](#7-políticas-de-escala-dinâmica)
+    * [1. Criação de Chave de Par (Key Pair) para SSH](#1-criação-de-chave-de-par-key-pair-para-ssh)
+    * [2. Criação da VPC e Subredes](#2-criação-da-vpc-e-subredes)
+    * [3. Security Groups](#3-security-groups)
+    * [4. Aplicação Web Simples (Hello World)](#4-aplicação-web-simples-hello-world)
+    * [5. Classic Load Balancer (CLB)](#5-classic-load-balancer-clb)
+    * [6. Auto Scaling Group (ASG)](#6-auto-scaling-group-asg)
+    * [7. Alarmes do CloudWatch](#7-alarmes-do-cloudwatch)
+    * [8. Políticas de Escala Dinâmica](#8-políticas-de-escala-dinâmica)
 * [Teste-e-Validação](#teste-e-validação)
     * [Teste de Diminuição de Capacidade (Scale In)](#teste-de-diminuição-de-capacidade-scale-in)
     * [Teste de Aumento de Capacidade (Scale Out)](#teste-de-aumento-de-capacidade-scale-out)
@@ -38,8 +38,8 @@ A arquitetura implementada consiste nos seguintes serviços AWS:
 7.  **Políticas de Escala Dinâmica (Dynamic Scaling Policies):** Definem as ações do ASG em resposta aos alarmes do CloudWatch.
 
 ## Configuração e Implementação
-Para acessar o projeto pode ser utilizado uma chave de par (key pair) para SSH. Como este item não é necessario, pois podemos usar a conexão via EC2 Instance Connect neste caso, chamaremos este item como o de numero 0.Para criar a chave de par siga os seguintes passos:
-### 0. Criação de Chave de Par (Key Pair) para SSH
+Para acessar o projeto pode ser utilizado uma chave de par (key pair) para SSH. Criamos a chave de par siga os seguintes passos:
+### 1. Criação de Chave de Par (Key Pair) para SSH
 
 Acesse o menu de EC2 e navegue na aba lateral esquerda até a opção Rede e segurança > pares de chaves. Clique em criar par de chaves. Escreva o nome do par de chaves, selecione o formato de chave como `pem` e clique em criar. O arquivo será baixado automaticamente para o seu computador. Guarde-o em um local seguro, pois ele será necessário para acessar as instâncias EC2 via SSH. Após isto, use o comando no powershell no arquivo baixado para conectar na instância EC2:
 ```powershell
@@ -52,7 +52,7 @@ ssh -i "nome-da-chave.pem" ec2-user@ip-da-instancia
 
 ![key-pair](images/key-pair.jpeg)
 
-### 1. Criação da VPC e Subredes
+### 2. Criação da VPC e Subredes
 
 Criação de uma VPC (Virtual Private Cloud) e algumas sub-redes públicas, eliminando a necessidade de NAT Gateway. Para criar a VPC, pesquise pela mesma, clique para acessar seu menu e clique em "criar VPC". Clique em VPC e mais, escreva o nome da VPC, slecione 2 sub-redes públicas e nenhuma rede privada. Clique em criar VPC.
 
@@ -61,14 +61,14 @@ Criação de uma VPC (Virtual Private Cloud) e algumas sub-redes públicas, elim
 O mapa de recursos resultante toma forma de:
 
 ![vpc-mapa-recursos](images/vpc-mapa-recursos.jpeg)
-### 2. Security Groups
+### 3. Security Groups
 Para este projeto, foram criados os seguintes security groups:
 * **`sg-ec2-teste-clb`:** Permite tráfego HTTP (porta 80) de do grupo de segurança do CLB e tráfego de saída para a porta 22 (SSH) para o IP do usuário. Não foi restringido nenhuma conexão de saída. Este grupo é associado às instâncias EC2.
 ![grupo de seguranca ec2](images/sg-ec2-inbound.jpeg)
 * **`sg-clb-teste`:** Permite tráfego HTTP (porta 80) de qualquer origem. Não foi restringido nenhuma conexão de saída. Este grupo é associado ao Classic Load Balancer (CLB).
 ![grupo de seguranca clb](images/sg-lb-inbound.jpeg)
 
-### 3. Aplicação Web Simples (Hello World)
+### 4. Aplicação Web Simples (Hello World)
 
 As instâncias EC2 foram configuradas para servir uma página web simples com a mensagem "hello world". Isso foi verificado acessando o DNS do Load Balancer.
 Para criar a instância EC2, pesquise por instâncias EC2, clique em "criar instância", selecione a imagem Amazon Linux 2, escolha o tipo de instância t2.micro, selecione o par de chaves criado anteriormente e associe os grupos de segurança criados. Após isto, selecione a opção configurações avançadas e adicione o seguinte [script](user_data.sh) de inicialização (user data) para instalar o servidor web e servir a página "hello world":
@@ -108,22 +108,34 @@ systemctl enable httpd
 
 
 
-### 4. Classic Load Balancer (CLB)
+### 5. Classic Load Balancer (CLB)
 
 Um CLB foi criado para distribuir o tráfego. Ele foi associado às sub-redes públicas e configurado para direcionar o tráfego para as instâncias do Auto Scaling Group. 
 
 ![Configuração do CLB](images/lb-detalhes.jpeg)
 ![Atividades do CLB](images/lb-healthy.jpeg)
-### 5. Auto Scaling Group (ASG)
+### 6. Auto Scaling Group (ASG)
 
 O ASG (`meu-asg-teste-clb`) foi configurado para gerenciar as instâncias EC2. Ele utiliza um Modelo de Lançamento para definir as características das instâncias (AMI) e está associado a múltiplas zonas de disponibilidade para alta resiliência.Para este projeto, foi solicitado que houvesse no mínimo uma instancia ativa e no máximo três, gerenciadas pelas [políticas](#7-políticas-de-escala-dinâmica) de escala da ASG que serão apresentadas no futuro.
 ![Detalhes ASG](images/asg-detalhes.jpeg)
 ![Politicas do ASG](images/asg-politicas.jpeg)
 ![Atividades do ASG](images/asg-atividades.jpeg)
 
-### 6. Alarmes do CloudWatch
+### 7. Alarmes do CloudWatch
+Para criar os alarmes do CloudWatch com a politica de escalabilidade pesquise por CloudWatch, clique em "Alarmes" no menu lateral esquerdo. Clique em "Criar alarme". Na seção "Selecionar métrica", clique em "Browse" e selecione a métrica do ELB. Na seção "Selecionar métrica", clique em "Browse" e selecione a métrica do ELB.
 
-Dois alarmes principais foram configurados no CloudWatch para monitorar a métrica `RequestCount` do CLB:
+Para criar o alarme de reduzir a quantidade de instancias (Scale In), ele detectará quando há menos de 5 requisições por instância. Especificamos as métricas e condições:
+
+Selecione a mesma métrica: `ELB > Per-LB Metrics > meu-clb-teste-asg > RequestCount`.
+
+Condições:
+    Estatística: Média
+    Período: 1 minuto
+    Tipo de limite: Estático.
+    Sempre que `RequestCount` for: Menor que.
+    que... 5 (Este é o valor de 5 requisições por instância para reduzir).
+
+Os dois alarmes principais foram configurados no CloudWatch para monitorar a métrica `RequestCount` do CLB:
 
 * **`alarme-diminuir-requestcount-clb` (Scale In):** Dispara quando o número de requisições cai abaixo de um limiar.
     * **Condição:** `RequestCount < 5` (para 1 ponto de dados em 1 minuto)
@@ -133,6 +145,15 @@ Dois alarmes principais foram configurados no CloudWatch para monitorar a métri
     
     ![Email de Diminuir em Alarme](images/diminuir-email.jpeg)
 
+Para criar o alarme para aumentar a quantidade de instancias, clique em "Per-LB Metrics". Encontre e selecione o Load Balancer: `meu-clb-teste-asg`. Selecione a métrica `RequestCount`.
+* Condições: 
+    * Estatística: média 
+    * Período: 1 minuto 
+    * Tipo de limite: Estático 
+    * Sempre que: RequestCount 
+    * for: Maior que
+
+Configure as ações na seção "Notificação", selecione "Em alarme". Selecione "Criar um novo tópico". No campo "Nome do tópico" : `notificacao-asg-escalar-clb`. No campo "Endpoints de e-mail", digite o e-mail. Adicionar detalhes do alarme nome ao alarme: `alarme-aumentar-requestcount-clb`.
 * **`alarme-aumentar-requestcount-clb` (Scale Out):** Dispara quando o número total de requisições excede um limiar.
     * **Condição:** `RequestCount > 100` (para 1 ponto de dados em 1 minuto)
     * **Métrica:** `AWS/ELB RequestCount`, Estatística `Sum` (Soma). (Importante: a estatística foi ajustada de Média para Soma para capturar o volume total de tráfego do LB).
@@ -141,9 +162,7 @@ Dois alarmes principais foram configurados no CloudWatch para monitorar a métri
     
     ![Email de Aumentar em Alarme](images/aumentar-email.jpeg)
     
-        
-
-### 7. Políticas de Escala Dinâmica
+### 8. Políticas de Escala Dinâmica
 
 Duas políticas de escalabilidade foram associadas ao ASG:
 
