@@ -147,7 +147,7 @@ Os dois alarmes principais foram configurados no CloudWatch para monitorar a mé
 
 Para criar o alarme para aumentar a quantidade de instancias, clique em "Per-LB Metrics". Encontre e selecione o Load Balancer: `meu-clb-teste-asg`. Selecione a métrica `RequestCount`.
 * Condições: 
-    * Estatística: média 
+    * Estatística: soma
     * Período: 1 minuto 
     * Tipo de limite: Estático 
     * Sempre que: RequestCount 
